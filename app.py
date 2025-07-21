@@ -3,7 +3,16 @@ import json
 from datetime import datetime
 import os
 
-DATA_FILE = "goal_data.json"
+# Получаем user_id из URL-параметров через st.query_params (новый способ)
+query_params = st.query_params
+user_id = query_params.get("user_id", "guest").strip()
+
+if not user_id:
+    st.stop()
+
+DATA_FILE = f"goal_data__{user_id}.json"
+
+# ------------------- Функции -------------------
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -20,8 +29,12 @@ def calculate_day(start_date):
     delta = today - datetime.strptime(start_date, "%Y-%m-%d").date()
     return min(delta.days + 1, 90)
 
+# ------------------- Интерфейс -------------------
+
 st.set_page_config(page_title="Успеть за 90 дней", layout="centered")
 st.title("🚀 Успеть за 90 дней")
+
+st.markdown(f"👤 Вы вошли как: **{user_id}**")
 
 data = load_data()
 
@@ -87,6 +100,6 @@ else:
         st.success("✅ Этот день уже отмечен.")
 
     with st.expander("⚙️ Настройки"):
-        if st.button("🗑️ Сбросить данные"):
+        if st.button("🗑️ Сбросить данные пользователя"):
             os.remove(DATA_FILE)
             st.rerun()
